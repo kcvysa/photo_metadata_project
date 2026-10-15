@@ -23,6 +23,16 @@ class PhotoMetadataForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["created_at"].input_formats = ["%Y-%m-%dT%H:%M"]
 
+        # Bootstrap-классы для всех полей
+        for name, field in self.fields.items():
+            widget = field.widget
+            if isinstance(widget, forms.CheckboxInput):
+                widget.attrs.setdefault("class", "form-check-input")
+            elif isinstance(widget, forms.Select):
+                widget.attrs.setdefault("class", "form-select")
+            else:
+                widget.attrs.setdefault("class", "form-control")
+
     def clean_title(self):
         title = self.cleaned_data["title"].strip()
         if len(title) < 2:
@@ -82,5 +92,7 @@ class PhotoMetadataForm(forms.ModelForm):
 class UploadFileForm(forms.Form):
     file = forms.FileField(
         label="Файл метаданных (.json или .xml)",
-        widget=forms.ClearableFileInput(attrs={"accept": ".json,.xml"}),
+        widget=forms.ClearableFileInput(
+            attrs={"accept": ".json,.xml", "class": "form-control"}
+        ),
     )
