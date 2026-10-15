@@ -1,13 +1,32 @@
 {% extends "metadata_app/base.html" %}
 
 {% block content %}
-<h1>Загрузить файл JSON/XML</h1>
-<p><small>Максимум 2 МБ. Проверяется расширение, кодировка и структура.
-Невалидный файл не сохраняется.</small></p>
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">Загрузить файл JSON/XML</div>
+            <div class="card-body">
+                <p class="text-muted small">
+                    Максимум 2 МБ. Проверяются расширение, кодировка UTF-8 и структура.
+                    Невалидный файл не сохраняется.
+                </p>
 
-<form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Загрузить</button>
-</form>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="{{ form.file.id_for_label }}" class="form-label">{{ form.file.label }}</label>
+                        {{ form.file }}
+                        {% if form.file.errors %}
+                            <div class="text-danger small mt-1">{{ form.file.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">Загрузить</button>
+                        <a href="{% url 'metadata_app:index' %}" class="btn btn-outline-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}

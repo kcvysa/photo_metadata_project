@@ -1,61 +1,77 @@
 {% extends "metadata_app/base.html" %}
 
 {% block content %}
-<h1>Файлы метаданных</h1>
+<h1 class="page-title mb-4">Файлы метаданных</h1>
 
 {% if not has_files %}
-    <p><strong>Файлы отсутствуют.</strong> Загрузите или создайте файл.</p>
+    <div class="alert alert-info">Файлы отсутствуют. Загрузите или создайте файл.</div>
 {% else %}
     {% for item in items %}
-        <h2>{{ item.filename }} <small>({{ item.format }})</small></h2>
-
-        {% if item.error %}
-            <p class="errorlist">{{ item.error }}</p>
-        {% else %}
-            <table>
-                <tr><th>Поле</th><th>Значение</th></tr>
-                {% for key, value in item.data.items %}
-                    <tr>
-                        <td>{{ key }}</td>
-                        <td>
-                            {% if value.items %}
-                                {{ value }}
-                            {% elif value|length and value.0 %}
-                                {{ value|join:", " }}
-                            {% else %}
-                                {{ value|default:"—" }}
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </table>
-        {% endif %}
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span><code>{{ item.filename }}</code></span>
+                <span class="badge bg-secondary badge-format">{{ item.format }}</span>
+            </div>
+            <div class="card-body p-0">
+                {% if item.error %}
+                    <div class="alert alert-danger m-3">{{ item.error }}</div>
+                {% else %}
+                    <table class="table table-striped mb-0">
+                        <thead>
+                            <tr><th style="width: 30%;">Поле</th><th>Значение</th></tr>
+                        </thead>
+                        <tbody>
+                            {% for key, value in item.data.items %}
+                                <tr>
+                                    <td><code>{{ key }}</code></td>
+                                    <td>
+                                        {% if value.items %}
+                                            {{ value }}
+                                        {% elif value|length and value.0 %}
+                                            {{ value|join:", " }}
+                                        {% else %}
+                                            {{ value|default:"—" }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
     {% endfor %}
 {% endif %}
 
-<div class="section">
-    <h1>Записи в базе данных</h1>
+<h2 class="page-title mt-5 mb-3">Записи в базе данных</h2>
 
-    {% if not has_db %}
-        <p><strong>В базе данных записей нет.</strong></p>
-    {% else %}
-        <table>
-            <tr>
-                <th>Название</th><th>Автор</th><th>Формат</th>
-                <th>Размер, px</th><th>KB</th><th>Теги</th><th>Файл</th>
-            </tr>
-            {% for obj in db_items %}
-                <tr>
-                    <td>{{ obj.title }}</td>
-                    <td>{{ obj.author }}</td>
-                    <td>{{ obj.format }}</td>
-                    <td>{{ obj.width }}×{{ obj.height }}</td>
-                    <td>{{ obj.size_kb }}</td>
-                    <td>{{ obj.tags }}</td>
-                    <td>{{ obj.source_file|default:"—" }}</td>
-                </tr>
-            {% endfor %}
-        </table>
-    {% endif %}
-</div>
+{% if not has_db %}
+    <div class="alert alert-info">В базе данных записей нет.</div>
+{% else %}
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-striped table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Название</th><th>Автор</th><th>Формат</th>
+                        <th>Размер, px</th><th>KB</th><th>Теги</th><th>Файл</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for obj in db_items %}
+                        <tr>
+                            <td>{{ obj.title }}</td>
+                            <td>{{ obj.author }}</td>
+                            <td><span class="badge bg-secondary badge-format">{{ obj.format }}</span></td>
+                            <td>{{ obj.width }}×{{ obj.height }}</td>
+                            <td>{{ obj.size_kb }}</td>
+                            <td>{{ obj.tags|default:"—" }}</td>
+                            <td><code>{{ obj.source_file|default:"—" }}</code></td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endif %}
 {% endblock %}

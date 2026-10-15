@@ -1,12 +1,41 @@
 {% extends "metadata_app/base.html" %}
 
 {% block content %}
-<h1>Метаданные о фотографиях в сети</h1>
-<p>Приложение сохраняет и читает метаданные о фотографиях в форматах JSON и XML,
-   а также дублирует записи в базу данных.</p>
-<ul>
-    <li><a href="{% url 'metadata_app:add' %}">Добавить метаданные через форму</a></li>
-    <li><a href="{% url 'metadata_app:upload' %}">Загрузить файл JSON/XML</a></li>
-    <li><a href="{% url 'metadata_app:files' %}">Просмотреть все файлы и записи в БД</a></li>
-</ul>
+<div class="text-center py-5">
+    <h1 class="page-title mb-3">Метаданные о фотографиях в сети</h1>
+    <p class="text-muted mb-4">
+        Сохранение и чтение метаданных о фотографиях в форматах <code>JSON</code> и <code>XML</code>
+        с дублированием записей в базу данных.
+    </p>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">➕ Добавить</h5>
+                <p class="card-text text-muted">Ввод метаданных через форму с валидацией и сохранением в файл.</p>
+                <a href="{% url 'metadata_app:add' %}" class="btn btn-primary">Перейти</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">⬆️ Загрузить файл</h5>
+                <p class="card-text text-muted">Загрузка JSON/XML с проверкой структуры и безопасным именем.</p>
+                <a href="{% url 'metadata_app:upload' %}" class="btn btn-primary">Перейти</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">📂 Файлы</h5>
+                <p class="card-text text-muted">Просмотр всех сохранённых файлов и записей из БД.</p>
+                <a href="{% url 'metadata_app:files' %}" class="btn btn-primary">Перейти</a>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
