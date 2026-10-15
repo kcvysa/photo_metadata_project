@@ -1,0 +1,61 @@
+{% extends "metadata_app/base.html" %}
+
+{% block content %}
+<h1>Файлы метаданных</h1>
+
+{% if not has_files %}
+    <p><strong>Файлы отсутствуют.</strong> Загрузите или создайте файл.</p>
+{% else %}
+    {% for item in items %}
+        <h2>{{ item.filename }} <small>({{ item.format }})</small></h2>
+
+        {% if item.error %}
+            <p class="errorlist">{{ item.error }}</p>
+        {% else %}
+            <table>
+                <tr><th>Поле</th><th>Значение</th></tr>
+                {% for key, value in item.data.items %}
+                    <tr>
+                        <td>{{ key }}</td>
+                        <td>
+                            {% if value.items %}
+                                {{ value }}
+                            {% elif value|length and value.0 %}
+                                {{ value|join:", " }}
+                            {% else %}
+                                {{ value|default:"—" }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+<div class="section">
+    <h1>Записи в базе данных</h1>
+
+    {% if not has_db %}
+        <p><strong>В базе данных записей нет.</strong></p>
+    {% else %}
+        <table>
+            <tr>
+                <th>Название</th><th>Автор</th><th>Формат</th>
+                <th>Размер, px</th><th>KB</th><th>Теги</th><th>Файл</th>
+            </tr>
+            {% for obj in db_items %}
+                <tr>
+                    <td>{{ obj.title }}</td>
+                    <td>{{ obj.author }}</td>
+                    <td>{{ obj.format }}</td>
+                    <td>{{ obj.width }}×{{ obj.height }}</td>
+                    <td>{{ obj.size_kb }}</td>
+                    <td>{{ obj.tags }}</td>
+                    <td>{{ obj.source_file|default:"—" }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+</div>
+{% endblock %}

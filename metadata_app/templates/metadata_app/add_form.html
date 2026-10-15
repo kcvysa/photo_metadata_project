@@ -1,0 +1,18 @@
+{% extends "metadata_app/base.html" %}
+
+{% block content %}
+<h1>Добавить метаданные фотографии</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <p>
+        <label for="fmt">Формат файла:</label>
+        <select name="fmt" id="fmt">
+            <option value="json">JSON</option>
+            <option value="xml">XML</option>
+        </select>
+    </p>
+    <button type="submit">Сохранить в БД и файл</button>
+</form>
+{% endblock %}

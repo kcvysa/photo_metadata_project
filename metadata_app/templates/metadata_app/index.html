@@ -1,0 +1,12 @@
+{% extends "metadata_app/base.html" %}
+
+{% block content %}
+<h1>Метаданные о фотографиях в сети</h1>
+<p>Приложение сохраняет и читает метаданные о фотографиях в форматах JSON и XML,
+   а также дублирует записи в базу данных.</p>
+<ul>
+    <li><a href="{% url 'metadata_app:add' %}">Добавить метаданные через форму</a></li>
+    <li><a href="{% url 'metadata_app:upload' %}">Загрузить файл JSON/XML</a></li>
+    <li><a href="{% url 'metadata_app:files' %}">Просмотреть все файлы и записи в БД</a></li>
+</ul>
+{% endblock %}

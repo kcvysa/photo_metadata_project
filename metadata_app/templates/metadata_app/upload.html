@@ -1,0 +1,13 @@
+{% extends "metadata_app/base.html" %}
+
+{% block content %}
+<h1>Загрузить файл JSON/XML</h1>
+<p><small>Максимум 2 МБ. Проверяется расширение, кодировка и структура.
+Невалидный файл не сохраняется.</small></p>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Загрузить</button>
+</form>
+{% endblock %}

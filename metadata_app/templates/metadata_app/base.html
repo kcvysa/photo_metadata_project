@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>{% block title %}Метаданные фотографий{% endblock %}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2rem; max-width: 1000px; }
+        nav a { margin-right: 1rem; }
+        .messages { list-style: none; padding: 0; }
+        .messages li { padding: .6rem 1rem; margin: .5rem 0; border-radius: 4px; }
+        .messages li.success { background: #d4edda; color: #155724; }
+        .messages li.error   { background: #f8d7da; color: #721c24; }
+        .messages li.warning { background: #fff3cd; color: #856404; }
+        table { border-collapse: collapse; width: 100%; margin: 1rem 0 2rem; }
+        th, td { border: 1px solid #ccc; padding: .4rem .6rem; text-align: left; vertical-align: top; }
+        th { background: #f0f0f0; }
+        form p { margin: .4rem 0; }
+        .errorlist { color: #b00020; list-style: none; padding: 0; margin: .2rem 0; }
+        small { color: #666; }
+        .section { margin-top: 2rem; }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'metadata_app:index' %}">Главная</a>
+        <a href="{% url 'metadata_app:add' %}">Добавить</a>
+        <a href="{% url 'metadata_app:upload' %}">Загрузить файл</a>
+        <a href="{% url 'metadata_app:files' %}">Файлы</a>
+    </nav>
+    <hr>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</body>
+</html>
