@@ -24,9 +24,7 @@ def add_metadata(request):
     """Ввод данных через форму → сохранение в файл (JSON/XML) + в БД."""
     if request.method == "POST":
         form = PhotoMetadataForm(request.POST)
-        fmt = request.POST.get("fmt", "json").lower()
-        if fmt not in {"json", "xml"}:
-            fmt = "json"
+        
 
         if form.is_valid():
             # 1. Сохраняем в БД
@@ -42,7 +40,7 @@ def add_metadata(request):
                 return redirect("metadata_app:add")
 
             try:
-                filename = save_metadata_to_file(data, fmt)
+                filename = save_metadata_to_file(data)
             except OSError as e:
                 obj.delete()
                 messages.error(request, f"Не удалось сохранить файл: {e}")
@@ -54,7 +52,7 @@ def add_metadata(request):
 
             messages.success(
                 request,
-                f"Запись сохранена в БД и в файл {filename} ({fmt.upper()}).",
+                f"Запись сохранена в БД и в файл {filename}.",
             )
             return redirect("metadata_app:add")
     else:
@@ -73,7 +71,7 @@ def upload_file(request):
 
             if not ok:
                 # Файл вообще не сохраняется — это и есть «удалить»
-                messages.error(request, f"Файл отклонён и удалён: {error}")
+                messages.danger(request, f"Файл отклонён и удалён: {error}")
                 return redirect("metadata_app:upload")
 
             ensure_upload_dir()
@@ -85,7 +83,7 @@ def upload_file(request):
                     for chunk in uploaded.chunks():
                         dest.write(chunk)
             except OSError as e:
-                messages.error(request, f"Не удалось сохранить файл: {e}")
+                messages.danger(request, f"Не удалось сохранить файл: {e}")
                 return redirect("metadata_app:upload")
 
             # Дублируем запись в БД
