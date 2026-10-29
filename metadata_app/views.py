@@ -21,20 +21,15 @@ def index(request):
 
 
 def add_metadata(request):
-    """Ввод данных через форму → сохранение в файл (JSON/XML) + в БД."""
     if request.method == "POST":
         form = PhotoMetadataForm(request.POST)
-        
 
         if form.is_valid():
-            # 1. Сохраняем в БД
             obj = form.save()
-
-            # 2. Готовим словарь и сохраняем в файл
             data = obj.to_dict()
             ok, error = validate_metadata(data)
+            
             if not ok:
-                # не должно случиться, т.к. форма уже валидна, но перестрахуемся
                 obj.delete()
                 messages.error(request, f"Ошибка валидации перед сохранением: {error}")
                 return redirect("metadata_app:add")
@@ -46,7 +41,6 @@ def add_metadata(request):
                 messages.error(request, f"Не удалось сохранить файл: {e}")
                 return redirect("metadata_app:add")
 
-            # 3. Запоминаем имя файла в БД
             obj.source_file = filename
             obj.save(update_fields=["source_file"])
 
@@ -62,7 +56,6 @@ def add_metadata(request):
 
 
 def upload_file(request):
-    """Загрузка файла JSON/XML с валидацией. Невалидный — не сохраняется."""
     if request.method == "POST":
         form = UploadFileForm(request.POST, request.FILES)
         if form.is_valid():
@@ -70,7 +63,6 @@ def upload_file(request):
             ok, error, data = validate_uploaded_file(uploaded)
 
             if not ok:
-                # Файл вообще не сохраняется — это и есть «удалить»
                 messages.danger(request, f"Файл отклонён и удалён: {error}")
                 return redirect("metadata_app:upload")
 
@@ -86,7 +78,6 @@ def upload_file(request):
                 messages.danger(request, f"Не удалось сохранить файл: {e}")
                 return redirect("metadata_app:upload")
 
-            # Дублируем запись в БД
             try:
                 obj = PhotoMetadata.from_dict(data, source_file=safe_name)
                 obj.full_clean(exclude=["created_at", "created", "source_file"])
@@ -110,7 +101,6 @@ def upload_file(request):
 
 
 def files_list(request):
-    """Показывает содержимое всех JSON/XML-файлов и записи из БД."""
     items = load_all_metadata_files()
     db_items = PhotoMetadata.objects.all()
     return render(

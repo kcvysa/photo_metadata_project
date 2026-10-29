@@ -4,7 +4,6 @@ from .models import PhotoMetadata
 
 
 class PhotoMetadataForm(forms.ModelForm):
-    """Форма ввода метаданных с расширенной валидацией."""
 
     class Meta:
         model = PhotoMetadata
@@ -23,7 +22,6 @@ class PhotoMetadataForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields["created_at"].input_formats = ["%Y-%m-%dT%H:%M"]
 
-        # Bootstrap-классы для всех полей
         for name, field in self.fields.items():
             widget = field.widget
             if isinstance(widget, forms.CheckboxInput):
@@ -91,8 +89,8 @@ class PhotoMetadataForm(forms.ModelForm):
 
 class UploadFileForm(forms.Form):
     file = forms.FileField(
-        label="Файл метаданных (.json или .xml)",
+        label="Файл метаданных (.json)",
         widget=forms.ClearableFileInput(
-            attrs={"accept": ".json,.xml", "class": "form-control"}
+            attrs={"accept": ".json", "class": "form-control"}
         ),
     )

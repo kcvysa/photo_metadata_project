@@ -2,8 +2,6 @@ from django.db import models
 
 
 class PhotoMetadata(models.Model):
-    """Метаданные о фотографии в сети."""
-
     FORMAT_CHOICES = [
         ("jpeg", "JPEG"),
         ("png", "PNG"),
@@ -24,7 +22,6 @@ class PhotoMetadata(models.Model):
     tags = models.CharField("Теги (через запятую)", max_length=300, blank=True)
     description = models.TextField("Описание", blank=True)
 
-    # имя файла, в который была сохранена эта запись
     source_file = models.CharField("Файл-источник", max_length=120, blank=True)
     created = models.DateTimeField("Создано в системе", auto_now_add=True)
 
@@ -37,7 +34,6 @@ class PhotoMetadata(models.Model):
         return self.title
 
     def to_dict(self) -> dict:
-        """Сериализация в словарь для JSON/XML."""
         return {
             "title": self.title,
             "author": self.author,
@@ -53,7 +49,6 @@ class PhotoMetadata(models.Model):
 
     @classmethod
     def from_dict(cls, data: dict, source_file: str = "") -> "PhotoMetadata":
-        """Создание объекта из словаря (после валидации)."""
         tags = data.get("tags") or []
         if isinstance(tags, list):
             tags = ", ".join(str(t).strip() for t in tags if str(t).strip())

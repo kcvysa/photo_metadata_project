@@ -9,7 +9,7 @@ from django.conf import settings
 
 UPLOAD_DIR = str(settings.UPLOAD_DIR)
 ALLOWED_EXTENSIONS = {".json"}
-MAX_FILE_SIZE = 2 * 1024 * 1024  # 2 МБ
+MAX_FILE_SIZE = 2 * 1024 * 1024
 
 REQUIRED_FIELDS = {"title", "author", "url", "width", "height", "format", "size_kb"}
 ALLOWED_FORMATS = {"jpeg", "png", "gif", "webp", "bmp", "tiff"}
@@ -20,7 +20,6 @@ def ensure_upload_dir() -> None:
 
 
 def save_metadata_to_file(data: dict) -> str:
-    """Сохраняет словарь в JSON. Возвращает имя созданного файла."""
     ensure_upload_dir()
     filename = f"meta_{uuid.uuid4().hex}.json"
     path = os.path.join(UPLOAD_DIR, filename)
