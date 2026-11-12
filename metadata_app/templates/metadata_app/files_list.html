@@ -1,77 +1,80 @@
 {% extends "metadata_app/base.html" %}
-
 {% block content %}
-<h1 class="page-title mb-4">Файлы метаданных</h1>
+<h1>Данные</h1>
 
-{% if not has_files %}
-    <div class="alert alert-info">Файлы отсутствуют. Загрузите или создайте файл.</div>
+
+<div class="mb-4">
+    <a href="?source=db" class="btn {% if source == 'db' %}btn-primary{% else %}btn-outline-primary{% endif %}">Из Базы Данных</a>
+    <a href="?source=file" class="btn {% if source == 'file' %}btn-primary{% else %}btn-outline-primary{% endif %}">Из Файлов</a>
+</div>
+
+{% if source == 'db' %}
+    
+    <input type="text" id="search-input" class="form-control mb-3" placeholder="Поиск по названию, автору или тегам...">
+    
+    <table class="table table-bordered" id="db-table">
+        <thead>
+            <tr><th>Название</th><th>Автор</th><th>Формат</th><th>Размер</th><th>Действия</th></tr>
+        </thead>
+        <tbody id="table-body">
+            {% for obj in db_items %}
+                <tr>
+                    <td>{{ obj.title }}</td><td>{{ obj.author }}</td><td>{{ obj.format }}</td>
+                    <td>{{ obj.width }}x{{ obj.height }}, {{ obj.size_kb }}KB</td>
+                    <td>
+                        <a href="{% url 'metadata_app:edit' obj.pk %}" class="btn btn-sm btn-warning">Изменить</a>
+                        <form action="{% url 'metadata_app:delete' obj.pk %}" method="post" style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Удалить?')">Удалить</button>
+                        </form>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr><td colspan="5">В БД нет записей.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    
+    <script>
+        document.getElementById('search-input').addEventListener('keyup', function() {
+            let query = this.value;
+            fetch(`/ajax/search/?q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    let tbody = document.getElementById('table-body');
+                    tbody.innerHTML = ''; // Очищаем таблицу
+                    
+                    if (data.results.length === 0) {
+                        tbody.innerHTML = '<tr><td colspan="5">Ничего не найдено.</td></tr>';
+                        return;
+                    }
+                    
+                    data.results.forEach(item => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${item.title}</td>
+                                <td>${item.author}</td>
+                                <td>${item.format}</td>
+                                <td>${item.width}x${item.height}, ${item.size_kb}KB</td>
+                                <td>
+                                    <a href="/edit/${item.id}/" class="btn btn-sm btn-warning">Изменить</a>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                });
+        });
+    </script>
+
 {% else %}
+    
     {% for item in items %}
-        <div class="card mb-4">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span><code>{{ item.filename }}</code></span>
-                <span class="badge bg-secondary badge-format">{{ item.format }}</span>
-            </div>
-            <div class="card-body p-0">
-                {% if item.error %}
-                    <div class="alert alert-danger m-3">{{ item.error }}</div>
-                {% else %}
-                    <table class="table table-striped mb-0">
-                        <thead>
-                            <tr><th style="width: 30%;">Поле</th><th>Значение</th></tr>
-                        </thead>
-                        <tbody>
-                            {% for key, value in item.data.items %}
-                                <tr>
-                                    <td><code>{{ key }}</code></td>
-                                    <td>
-                                        {% if value.items %}
-                                            {{ value }}
-                                        {% elif value|length and value.0 %}
-                                            {{ value|join:", " }}
-                                        {% else %}
-                                            {{ value|default:"—" }}
-                                        {% endif %}
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% endif %}
-            </div>
-        </div>
+        <h4>{{ item.filename }}</h4>
+        <pre>{{ item.data }}</pre>
+    {% empty %}
+        <p>Файлов нет.</p>
     {% endfor %}
 {% endif %}
 
-<h2 class="page-title mt-5 mb-3">Записи в базе данных</h2>
-
-{% if not has_db %}
-    <div class="alert alert-info">В базе данных записей нет.</div>
-{% else %}
-    <div class="card">
-        <div class="card-body p-0">
-            <table class="table table-striped table-hover mb-0">
-                <thead>
-                    <tr>
-                        <th>Название</th><th>Автор</th><th>Формат</th>
-                        <th>Размер, px</th><th>KB</th><th>Теги</th><th>Файл</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for obj in db_items %}
-                        <tr>
-                            <td>{{ obj.title }}</td>
-                            <td>{{ obj.author }}</td>
-                            <td><span class="badge bg-secondary badge-format">{{ obj.format }}</span></td>
-                            <td>{{ obj.width }}×{{ obj.height }}</td>
-                            <td>{{ obj.size_kb }}</td>
-                            <td>{{ obj.tags|default:"—" }}</td>
-                            <td><code>{{ obj.source_file|default:"—" }}</code></td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-{% endif %}
 {% endblock %}
