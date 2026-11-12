@@ -45,3 +45,11 @@ python manage.py migrate
 
 # 5. Запустить сервер разработки
 python manage.py runserver
+
+## Деплой на PythonAnywhere
+Приложение развернуто на бесплатном хостинге PythonAnywhere.
+Ссылка: https://твой_логин.pythonanywhere.com
+
+### Как развернуть локально:
+1. `python manage.py migrate`
+2. `python manage.py runserver`
