@@ -4,7 +4,16 @@ from .models import PhotoMetadata
 
 
 class PhotoMetadataForm(forms.ModelForm):
-
+    SAVE_CHOICES = [
+        ('db', 'Сохранить в Базу Данных'),
+        ('file', 'Сохранить в файл JSON'),
+    ]
+    save_to = forms.ChoiceField(
+        choices=SAVE_CHOICES, 
+        widget=forms.RadioSelect, 
+        initial='db', 
+        label="Куда сохранить?"
+    )
     class Meta:
         model = PhotoMetadata
         fields = [

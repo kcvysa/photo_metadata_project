@@ -1,4 +1,7 @@
 import os
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.db.models import Q
 
 from django.contrib import messages
 from django.shortcuts import redirect, render
@@ -25,33 +28,28 @@ def add_metadata(request):
         form = PhotoMetadataForm(request.POST)
 
         if form.is_valid():
-            obj = form.save()
-            data = obj.to_dict()
-            ok, error = validate_metadata(data)
+            save_to = form.cleaned_data["save_to"]
             
-            if not ok:
-                obj.delete()
-                messages.error(request, f"Ошибка валидации перед сохранением: {error}")
-                return redirect("metadata_app:add")
-
-            try:
+            if save_to == 'db':
+                url = form.cleaned_data['url']
+                if PhotoMetadata.objects.filter(url=url).exists():
+                    messages.error(request, "Фотография с таким URL уже есть в базе данных!")
+                    return render(request, "metadata_app/add_form.html", {"form": form})
+                
+                form.save()
+                messages.success(request, "Запись сохранена в БД.")
+                
+            else:
+                data = {k: v for k, v in form.cleaned_data.items() if k != 'save_to'}
+                if data.get('created_at'):
+                    data['created_at'] = data['created_at'].isoformat()
+                
                 filename = save_metadata_to_file(data)
-            except OSError as e:
-                obj.delete()
-                messages.error(request, f"Не удалось сохранить файл: {e}")
-                return redirect("metadata_app:add")
-
-            obj.source_file = filename
-            obj.save(update_fields=["source_file"])
-
-            messages.success(
-                request,
-                f"Запись сохранена в БД и в файл {filename}.",
-            )
+                messages.success(request, f"Запись сохранена в файл {filename}.")
+                
             return redirect("metadata_app:add")
     else:
         form = PhotoMetadataForm()
-
     return render(request, "metadata_app/add_form.html", {"form": form})
 
 
@@ -101,15 +99,50 @@ def upload_file(request):
 
 
 def files_list(request):
-    items = load_all_metadata_files()
-    db_items = PhotoMetadata.objects.all()
-    return render(
-        request,
-        "metadata_app/files_list.html",
-        {
-            "items": items,
-            "has_files": bool(items),
-            "db_items": db_items,
-            "has_db": db_items.exists(),
-        },
-    )
+    source = request.GET.get('source', 'db') 
+    
+    context = {'source': source}
+    if source == 'db':
+        context['db_items'] = PhotoMetadata.objects.all().order_by('-created')
+    else:
+        context['items'] = load_all_metadata_files()
+        
+    return render(request, "metadata_app/files_list.html", context)
+
+
+def ajax_search(request):
+    """Возвращает найденные записи в формате JSON для JS."""
+    query = request.GET.get('q', '')
+    if query:
+       
+        results = PhotoMetadata.objects.filter(
+            Q(title__icontains=query) | 
+            Q(author__icontains=query) | 
+            Q(tags__icontains=query)
+        ).values('id', 'title', 'author', 'format', 'width', 'height', 'size_kb', 'tags')
+        return JsonResponse({'results': list(results)})
+    return JsonResponse({'results': []})
+
+def delete_metadata(request, pk):
+    """Удаление записи."""
+    obj = get_object_or_404(PhotoMetadata, pk=pk)
+    if request.method == "POST":
+        obj.delete()
+        messages.success(request, "Запись удалена.")
+        return redirect(f"{request.META.get('HTTP_REFERER', '/files/')}")
+    return render(request, "metadata_app/confirm_delete.html", {"obj": obj})
+
+def edit_metadata(request, pk):
+    """Редактирование записи."""
+    obj = get_object_or_404(PhotoMetadata, pk=pk)
+    if request.method == "POST":
+        form = PhotoMetadataForm(request.POST, instance=obj)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Запись обновлена.")
+            return redirect("metadata_app:files")
+    else:
+        
+        form = PhotoMetadataForm(instance=obj)
+        
+    return render(request, "metadata_app/edit_form.html", {"form": form})
