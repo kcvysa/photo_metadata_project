@@ -9,4 +9,6 @@ media/uploads/*
 !media/uploads/.gitkeep
 .idea/
 .vscode/
+.env
+db.json
 staticfiles/
