@@ -53,3 +53,13 @@ python manage.py runserver
 ### Как развернуть локально:
 1. `python manage.py migrate`
 2. `python manage.py runserver`
+
+## Запуск в Docker
+1. Создайте `.env` на основе `.env.example`.
+2. Запустите контейнеры: `docker-compose up -d --build`
+3. Примените миграции: `docker-compose exec web python manage.py migrate`
+4. Сайт доступен на `http://localhost:8000`
+
+## Миграция данных
+1. Локально выгрузите данные: `python manage.py dumpdata > db.json`
+2. Загрузите в Docker: `docker-compose exec web python manage.py loaddata db.json`
